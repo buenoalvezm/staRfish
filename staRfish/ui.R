@@ -1,15 +1,5 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
 
-# Define UI for application that draws a histogram
 fluidPage(
 
     # Application title
@@ -30,10 +20,27 @@ fluidPage(
                       multiple = T,
                       selected = c("mrnaRnaSeqSampleCount","mrnaRnaSeqV2SampleCount",
                                    "massSpectrometrySampleCount")),
+          numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
+          # fluidRow(
+          #   column(8,
+          #           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
+          #          ),
+          #   column(4,
+          #           checkboxInput("minimum_N_analysis", "Set per data type", value = F),
+          #          ),
+          # ),
+          # conditionalPanel(condition = "input.minimum_N_analysis==1",
+          #                   textInput("n_samples_diiff", "Min number of samples per data type (comma separated)",placeholder = "30,30,30", value = "30,30,30")
+          #                  )
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
+          tabsetPanel(
+            tabPanel("Datasets",),
+            tabPanel("Data Overview"),
+            tabPanel("Analysis1")
+          )
 
         )
     )
