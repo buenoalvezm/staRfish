@@ -32,7 +32,8 @@ cor_matrix <- function(rna,protein) {
   require(reshape2)
   require(ggplot2)
   require(viridis)
-  gathered <- dplyr::inner_join(x=protein,y=rna,by="gene",suffix=c(".prot",".rna")) %>% select(-gene) %>% na.omit()
+  gathered <- dplyr::inner_join(x=protein,y=rna,by="gene",suffix=c(".prot",".rna"))
+  %>% select(-gene) #%>%
   cormat <- round(cor(gathered),2)
   mcormat <- melt(cormat)
 
