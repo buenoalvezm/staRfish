@@ -21,6 +21,7 @@ fluidPage(
                       selected = c("mrnaRnaSeqSampleCount","mrnaRnaSeqV2SampleCount",
                                    "massSpectrometrySampleCount")),
           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
+          textOutput("chosen_fields"),
           # fluidRow(
           #   column(8,
           #           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
