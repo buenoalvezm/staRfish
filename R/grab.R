@@ -23,7 +23,7 @@ grab <- function(n, ...){
         select(studyId, name, cancerTypeId, referenceGenome, importDate,...)
     })
 
-  # Find studies with both transcriptomics and proteomics data
+  # Filter according to minimum sample size
   candidate_studies <-
     all_studies_info |>
     filter(if_all(6:last_col(), ~ . > n))
