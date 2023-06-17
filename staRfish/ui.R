@@ -37,8 +37,8 @@ fluidPage(
         # Show a plot of the generated distribution
         mainPanel(
           tabsetPanel(
-            tabPanel("Datasets",),
-            tabPanel("Data Overview"),
+            tabPanel("Datasets", DT::dataTableOutput("study_table")),
+            tabPanel("Data Overview", DT::dataTableOutput("filtered_study_table")),
             tabPanel("Analysis1")
           )
 
