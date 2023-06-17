@@ -23,7 +23,7 @@ require(scales)
 #rna <- read_tsv("/home/rstudio/staRfish/data_test/data_mrna_seq_fpkm.txt") %>% dplyr::rename("gene"=Hugo_Symbol)
 
 
-cor_matrix <- function(rna,protein) {
+cor_matrix_samples <- function(rna,protein) {
   require(reshape2)
   require(ggplot2)
   require(viridis)
@@ -41,4 +41,30 @@ cor_matrix <- function(rna,protein) {
           axis.title.y=element_blank()
     ) + scale_fill_viridis(option="inferno")
   return(p)
+}
+
+transcript_protein_correlation <- function(rna,protein) {
+  r <- r %>% na.omit()
+  r$gene <- make.unique(r$gene)
+  p <- p %>% na.omit()
+  p$gene <- make.unique(p$gene)
+
+  common_genes <- intersect(unique(r$gene),unique(p$gene))
+  rna_tib <- r %>% filter(gene %in% common_genes) %>% arrange(gene)
+  protein_tib <- p %>% filter(gene %in% common_genes) %>% arrange(gene)
+
+  # Remove the gene column for correlation calculation
+  trans_data <- as.matrix(rna_tib[,-1])
+  prot_data <- as.matrix(protein_tib[,-1])
+
+  # Calculate correlations
+  gene_correlations <- diag(cor(t(trans_data), t(prot_data)))
+
+  correlations_df <- data.frame(gene = common_genes, correlation = gene_correlations) %>% .[order(.$correlation),]
+  correlations_df$gene <- factor(correlations_df$gene , levels = correlations_df$gene)
+  ggplot(correlations_df, aes(x = gene, y = correlation)) +
+    geom_bar(stat = "identity") +
+    theme(axis.text.x = element_blank()) +
+    labs(x = "Gene", y = "Correlation between Transcriptomics and Proteomics", title = "Gene Correlations")
+
 }
