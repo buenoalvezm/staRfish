@@ -9,6 +9,8 @@ function(input, output, session) {
   observe({
     if(!is.null(input$study_table_rows_selected)){
       rv$s <- input$study_table_rows_selected
+    } else {
+      rv$s <- NULL
     }
   })
   data <- iris
