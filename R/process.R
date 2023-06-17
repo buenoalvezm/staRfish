@@ -44,9 +44,9 @@ cor_matrix_samples <- function(rna,protein) {
 }
 
 transcript_protein_correlation <- function(rna,protein) {
-  r <- r %>% na.omit()
+  r <- rna %>% na.omit()
   r$gene <- make.unique(r$gene)
-  p <- p %>% na.omit()
+  p <- protein %>% na.omit()
   p$gene <- make.unique(p$gene)
 
   common_genes <- intersect(unique(r$gene),unique(p$gene))
@@ -62,9 +62,18 @@ transcript_protein_correlation <- function(rna,protein) {
 
   correlations_df <- data.frame(gene = common_genes, correlation = gene_correlations) %>% .[order(.$correlation),]
   correlations_df$gene <- factor(correlations_df$gene , levels = correlations_df$gene)
-  ggplot(correlations_df, aes(x = gene, y = correlation)) +
-    geom_bar(stat = "identity") +
-    theme(axis.text.x = element_blank()) +
+  p <- ggplot(correlations_df, aes(x = gene, y = correlation,color=correlation)) +
+    geom_point(stat = "identity") +
+    theme(axis.title.x= element_blank(),
+          axis.text.x = element_blank(),
+          panel.background = element_rect(fill="white"),
+          legend.position = "none",
+          plot.title= element_text(hjust = 0.5)) +
+    geom_hline(yintercept=0)+
+    expand_limits(x= c(-50, length(levels(correlations_df$gene))*1.01 ))+
+    colorspace::scale_color_continuous_divergingx(palette="PrGn") +
     labs(x = "Gene", y = "Correlation between Transcriptomics and Proteomics", title = "Gene Correlations")
-
+  print(p)
+  df <- rbind(correlations_df[1:10,],correlations_df[(length(correlations_df[[1]])-10):length(correlations_df[[1]]),])
+  return(df)
 }
