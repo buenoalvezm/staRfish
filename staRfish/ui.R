@@ -21,7 +21,22 @@ fluidPage(
                       selected = c("mrnaRnaSeqSampleCount","mrnaRnaSeqV2SampleCount",
                                    "massSpectrometrySampleCount")),
           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
-          textOutput("chosen_fields"),
+        ),
+
+        # Show a plot of the generated distribution
+        mainPanel(
+          tabsetPanel(
+            tabPanel("Datasets", tableOutput("study_table")),
+            # tabPanel("Datasets", DT::dataTableOutput("study_table")),
+            # tabPanel("Data Overview", DT::dataTableOutput("filtered_study_table")),
+            # tabPanel("Analysis1"),
+            # tabPanel("testing", fluidRow(DT::dataTableOutput('study_table')))
+          )
+
+        )
+    )
+)
+
           # fluidRow(
           #   column(8,
           #           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
@@ -33,16 +48,3 @@ fluidPage(
           # conditionalPanel(condition = "input.minimum_N_analysis==1",
           #                   textInput("n_samples_diiff", "Min number of samples per data type (comma separated)",placeholder = "30,30,30", value = "30,30,30")
           #                  )
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-          tabsetPanel(
-            tabPanel("Datasets", DT::dataTableOutput("study_table")),
-            tabPanel("Data Overview", DT::dataTableOutput("filtered_study_table")),
-            tabPanel("Analysis1")
-          )
-
-        )
-    )
-)
