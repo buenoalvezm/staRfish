@@ -34,9 +34,9 @@ create_rna_prot_correlation <- function(rna,protein) {
   p <- protein %>% na.omit()
   p$gene <- make.unique(p$gene)
 
-  common_genes <- intersect(unique(r$gene),unique(p$gene))
-  rna_tib <- r %>% filter(gene %in% common_genes) %>% arrange(gene)
-  protein_tib <- p %>% filter(gene %in% common_genes) %>% arrange(gene)
+  common_genes <- dplyr::intersect(unique(r$gene),unique(p$gene)) %>% sort()
+  rna_tib <- r %>% dplyr::filter(gene %in% common_genes) %>% arrange(gene)
+  protein_tib <- p %>% dplyr::filter(gene %in% common_genes) %>% arrange(gene)
 
   trans_data <- as.matrix(rna_tib[,-1])
   prot_data <- as.matrix(protein_tib[,-1])
@@ -80,7 +80,7 @@ create_pw_df <- function(corr_df) {
 
 }
 
-
+### START PLOTTING DATA ###
 cor_matrix_samples <- function(gathered_data) {
   require(reshape2)
   require(ggplot2)
@@ -107,8 +107,9 @@ correlation_plot_levels <- function(correlations_df) {
   Labels_top = rbind(head(arrange(correlations_df,desc(correlation)),10), head(arrange(correlations_df,correlation),10))
   correlations_df$label = if_else(correlations_df$gene %in% Labels_top$gene,
                                   correlations_df$gene, NA)
+  correlations_df$color <- if_else(correlations_df$correlation<0,(correlations_df$correlation*2),correlations_df$correlation)
 
-  p <- ggplot(correlations_df, aes(x = gene, y = correlation,color=correlation)) +
+  p <- ggplot(correlations_df, aes(x = gene, y = correlation,color=color)) +
     geom_point(stat = "identity") +
     theme(axis.title.x= element_blank(),
           axis.text.x = element_blank(),
@@ -117,12 +118,12 @@ correlation_plot_levels <- function(correlations_df) {
           plot.title= element_text(hjust = 0.5)) +
     geom_hline(yintercept=0)+
     ggrepel::geom_text_repel(aes(label = label),color="black",
-                             size = 4, show.legend = FALSE, max.overlaps=10000) +
+                             size = 4, show.legend = FALSE, max.overlaps=10000,box.padding=0.75) +
     expand_limits(x= c(-50, length(levels(correlations_df$gene))*1.01 ))+
-    colorspace::scale_color_continuous_divergingx(palette="PrGn") +
+    colorspace::scale_color_continuous_divergingx(palette="PiYG") +
     labs(x = "Gene", y = "Correlation between Transcriptomics and Proteomics", title = "Gene Correlations")
   suppressWarnings(print(p))
-  df <- rbind(correlations_df[1:10,],correlations_df[(length(correlations_df[[1]])-10):length(correlations_df[[1]]),])
+  df <- rbind(correlations_df[1:10,],correlations_df[(length(correlations_df[[1]])-10):length(correlations_df[[1]]),])[1:2]
   return(df)
 }
 
@@ -137,7 +138,6 @@ KEGG_correlation_plot <- function(combined_pw_data) {
   average_correlation_per_pathway$color = if_else(average_correlation_per_pathway$Description %in% Labels_top$Description,
                                                   1, NA)
 
-  # You may also want to visualize the results
   p <- ggplot(average_correlation_per_pathway, aes(x=reorder(Description, average_correlation), y=average_correlation,color=color)) +
     geom_point(stat="identity") +
     theme_minimal() +
@@ -170,6 +170,5 @@ plot_gene <- function(gathered_data,gene_name) {
           plot.title= element_text(hjust = 0.5)) +
     xlab("Protein expression") +
     ylab("RNA expression")
-
 
 }
