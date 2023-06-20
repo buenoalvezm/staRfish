@@ -1,43 +1,37 @@
-line_compare_generate <- function (transcriptomics,proteomics) {
-  stopifnot(all(transcriptomics$patient_id %in% proteomics$patient_id))
+require(tidyverse)
+require(scales)
 
-}
+#rna <- read_tsv("/home/rstudio/staRfish/data_test/data_mrna_seq_v2_rsem.txt")
+#rpot <- read_tsv("/home/rstudio/staRfish/data_test/data_protein_quantification.txt") %>%
+#  separate(Composite.Element.REF,into=c("gene","gene_2")) %>% select(!gene_2) %>% na.omit() %>%
+#  mutate(avg_expr=rowMeans(pick(!contains("gene")),to=c((-1),1)))
+#rna_2<- rna[3:ncol(rna)][colnames(rna[3:ncol(rna)]) %in% colnames(rpot[3:ncol(rpot)]) ]
+#rna_3 <- rna_2 %>% mutate(avg_expr = rowMeans(log2(pick(everything())+1)),gene=rna$Hugo_Symbol) %>%
+#  .[!is.na(.$gene),] %>% select(gene,avg_expr)
+#rpot_2 <- rpot %>% select(gene,avg_expr)
 
-library(tidyverse)
-library(scales)
+#total <- inner_join(rpot_2,rna_3, by="gene", suffix=c(".prot",".rna"))
 
-rna <- read_tsv("/home/rstudio/staRfish/data_test/data_mrna_seq_v2_rsem.txt")
-rpot <- read_tsv("/home/rstudio/staRfish/data_test/data_protein_quantification.txt") %>%
-  separate(Composite.Element.REF,into=c("gene","gene_2")) %>% select(!gene_2) %>% na.omit() %>%
-  mutate(avg_expr=rowMeans(pick(!contains("gene")),to=c((-1),1)))
-rna_2<- rna[3:ncol(rna)][colnames(rna[3:ncol(rna)]) %in% colnames(rpot[3:ncol(rpot)]) ]
-rna_3 <- rna_2 %>% mutate(avg_expr = rowMeans(log2(pick(everything())+1)),gene=rna$Hugo_Symbol) %>%
-  .[!is.na(.$gene),] %>% select(gene,avg_expr)
-rpot_2 <- rpot %>% select(gene,avg_expr)
-
-total <- inner_join(rpot_2,rna_3, by="gene", suffix=c(".prot",".rna"))
-
-ggplot(total,aes(x=avg_expr.prot,y=avg_expr.rna)) + geom_point()
+#ggplot(total,aes(x=avg_expr.prot,y=avg_expr.rna)) + geom_point()
 
 
-rna_4 <- rna_2 %>% mutate(gene=rna$Hugo_Symbol)
-total_all_samp <- inner_join(rpot,rna_4,by="gene",suffix=c(".prot",".rna")) %>% select(-gene)
+#rna_4 <- rna_2 %>% mutate(gene=rna$Hugo_Symbol)
+#total_all_samp <- inner_join(rpot,rna_4,by="gene",suffix=c(".prot",".rna")) %>% select(-gene)
 
-protein <- read_tsv("/home/rstudio/staRfish/data_test/data_protein_quantification.txt") %>%
-  separate(Composite.Element.REF,into=c("gene","gene_2")) %>% select(!gene_2) %>% na.omit()
-rna <- read_tsv("/home/rstudio/staRfish/data_test/data_mrna_seq_fpkm.txt") %>% dplyr::rename("gene"=Hugo_Symbol)
+#protein <- read_tsv("/home/rstudio/staRfish/data_test/data_protein_quantification.txt") %>%
+#  separate(Composite.Element.REF,into=c("gene","gene_2")) %>% select(!gene_2) %>% na.omit()
+#rna <- read_tsv("/home/rstudio/staRfish/data_test/data_mrna_seq_fpkm.txt") %>% dplyr::rename("gene"=Hugo_Symbol)
 
 
-cor_matrix <- function(rna,protein) {
+cor_matrix_samples <- function(rna,protein) {
   require(reshape2)
   require(ggplot2)
   require(viridis)
-  gathered <- dplyr::inner_join(x=protein,y=rna,by="gene",suffix=c(".prot",".rna"))
-  %>% select(-gene) #%>%
+  gathered <- dplyr::inner_join(x=protein,y=rna,by="gene",suffix=c(".prot",".rna")) %>% select(-gene) %>% na.omit()
   cormat <- round(cor(gathered),2)
   mcormat <- melt(cormat)
 
-  ggplot(data = mcormat, aes(x=Var1, y=Var2, fill=value)) +
+  p <- ggplot(data = mcormat, aes(x=Var1, y=Var2, fill=value)) +
     geom_tile() +
     theme(axis.text.x=element_blank(), #remove x axis labels
           axis.ticks.x=element_blank(), #remove x axis ticks
@@ -46,5 +40,73 @@ cor_matrix <- function(rna,protein) {
           axis.title.x=element_blank(),
           axis.title.y=element_blank()
     ) + scale_fill_viridis(option="inferno")
+  return(p)
+}
 
+create_transcript_protein_correlation <- function(rna,protein) {
+  r <- rna %>% na.omit()
+  r$gene <- make.unique(r$gene)
+  p <- protein %>% na.omit()
+  p$gene <- make.unique(p$gene)
+
+  common_genes <- intersect(unique(r$gene),unique(p$gene))
+  rna_tib <- r %>% filter(gene %in% common_genes) %>% arrange(gene)
+  protein_tib <- p %>% filter(gene %in% common_genes) %>% arrange(gene)
+
+  # Remove the gene column for correlation calculation
+  trans_data <- as.matrix(rna_tib[,-1])
+  prot_data <- as.matrix(protein_tib[,-1])
+
+  # Calculate correlations
+  gene_correlations <- diag(cor(t(trans_data), t(prot_data)))
+
+  correlations_df <- data.frame(gene = common_genes, correlation = gene_correlations) %>% .[order(.$correlation),]
+  correlations_df$gene <- factor(correlations_df$gene , levels = correlations_df$gene)
+  p <- ggplot(correlations_df, aes(x = gene, y = correlation,color=correlation)) +
+    geom_point(stat = "identity") +
+    theme(axis.title.x= element_blank(),
+          axis.text.x = element_blank(),
+          panel.background = element_rect(fill="white"),
+          legend.position = "none",
+          plot.title= element_text(hjust = 0.5)) +
+    geom_hline(yintercept=0)+
+    expand_limits(x= c(-50, length(levels(correlations_df$gene))*1.01 ))+
+    colorspace::scale_color_continuous_divergingx(palette="PrGn") +
+    labs(x = "Gene", y = "Correlation between Transcriptomics and Proteomics", title = "Gene Correlations")
+  print(p)
+  df <- rbind(correlations_df[1:10,],correlations_df[(length(correlations_df[[1]])-10):length(correlations_df[[1]]),])
+  return(df)
+}
+
+KEGG_correlation <- function(rna,protein) {
+  require(tidyverse)
+  require(clusterProfiler)
+  require(org.Hs.eg.db)
+
+  # Assume you have three tibbles: protein_data, transcript_data, correlation_data
+  # Make sure that all tibbles have a common identifier column, for instance, gene_symbol
+
+  # Merging the protein, transcript, and correlation data into one table
+  merged_data <- protein_data %>%
+    inner_join(transcript_data, by = "gene_symbol") %>%
+    inner_join(correlation_data, by = "gene_symbol")
+
+  # You might want to do some preprocessing steps such as normalization, removing missing values, etc.
+
+  # Now let's do KEGG pathway analysis on genes based on their correlation
+  # Assuming correlation_data has columns: gene_symbol and correlation_coefficient
+  genes <- merged_data$gene_symbol
+  correlation_scores <- merged_data$correlation_coefficient
+
+  # Convert gene symbols to ENTREZ IDs
+  gene_ids <- mapIds(org.Hs.eg.db, keys=genes, column="ENTREZID", keytype="SYMBOL", multiVals="first")
+
+  # Perform enrichment analysis
+  kegg_results <- enrichKEGG(gene         = gene_ids,
+                             organism     = 'hsa', # Assuming human genes
+                             pvalueCutoff = 0.05,  # p-value threshold
+                             qvalueCutoff = 0.2)   # FDR threshold
+
+  # Visualize the KEGG pathway analysis results
+  dotplot(kegg_results, showCategory=10) + theme_minimal()
 }
