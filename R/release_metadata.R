@@ -6,8 +6,8 @@
 #' @export
 #'
 #' @examples
-#' squeeze_metadata(study_id = "brca_cptac_2020")
-squeeze_metadata <- function(study_id) {
+#' release_metadata(study_id = "brca_cptac_2020")
+release_metadata <- function(study_id) {
   cbio <- cBioPortal()
   metadata <- clinicalData(cbio, study_id)
   return(metadata)
