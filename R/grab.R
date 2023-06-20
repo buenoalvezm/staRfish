@@ -18,7 +18,7 @@ grab <- function(){
   # Get info for all studies
   all_studies_info <-
     map_df(all_studies$studyId, function(study) {
-      get_study_info(study_id = study, base_url = "wwww.cbioportal.org") |>
+      get_study_info(study_id = study, base_url = "www.cbioportal.org") |>
         as_tibble()
     })
 
