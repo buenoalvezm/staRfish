@@ -7,22 +7,40 @@ library(magrittr)
 
 source("../R/grab.R")
 source("../R/process.R")
+source("../R/squeeze.R")
 
 function(input, output, session) {
 
-  queried_table <- reactive({input$chosen_fields %>%
+  all_studies <- reactive({input$chosen_fields %>%
     strsplit(split = ",") %$%
-    grab(n = input$n_samples, unlist(.))
+    squeeze(n = input$n_samples, unlist(.))
     })
+
+  # output$study_ids <- NULL
+  output$study_table <- renderTable({all_studies()})
+  study_ids <- reactive({all_studies() %>% pull(studyId)})
+  # print(study_ids)
+  observe({
+    updateSelectInput(session, "select_study", choices =   study_ids())
+  })
+  # %>% pull(studyId)
+  # print(test %>% pull(studyId))
+  # output$study_ids <- renderText(c("wait for results", "test"))#, renderTable(queried_table()) %>% pull(studyId))
+
+
+
+
+
+
+
+
+  }
+
   # reactive({print(queried_table())})
+  # print(queried_table)
   # isolate(queried_table)
   # print(input$chosen_fields)
   # print(observe(input$n_samples))
-
-  output$study_table <- renderTable({queried_table()})
-  # print(queried_table)
-}
-
   # output$study_table <- DT::renderDataTable({DT::datatable((queried_data))})
   # output$study_table <- DT::renderDataTable({DT::datatable(renderDT(iris))})
   # output$study_table <- renderTable({iris})

@@ -18,33 +18,22 @@ fluidPage(
                                   rppa = "rppaSampleCount",
                                   massSpec ="massSpectrometrySampleCount"),
                       multiple = T,
-                      selected = c("mrnaRnaSeqSampleCount","mrnaRnaSeqV2SampleCount",
+                      selected = c("mrnaRnaSeqSampleCount",
                                    "massSpectrometrySampleCount")),
           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
+          selectInput("select_study",label="Select study", choices= "Please choose one", multiple = F),
+          # textOutput("study_ids")
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
           tabsetPanel(
-            tabPanel("Datasets", tableOutput("study_table")),
-            # tabPanel("Datasets", DT::dataTableOutput("study_table")),
-            # tabPanel("Data Overview", DT::dataTableOutput("filtered_study_table")),
-            # tabPanel("Analysis1"),
-            # tabPanel("testing", fluidRow(DT::dataTableOutput('study_table')))
+            tabPanel("Study browser", tableOutput("study_table")),
+            tabPanel("Active study"),
+            tabPanel("Correlation"),
+
           )
 
         )
     )
 )
-
-          # fluidRow(
-          #   column(8,
-          #           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
-          #          ),
-          #   column(4,
-          #           checkboxInput("minimum_N_analysis", "Set per data type", value = F),
-          #          ),
-          # ),
-          # conditionalPanel(condition = "input.minimum_N_analysis==1",
-          #                   textInput("n_samples_diiff", "Min number of samples per data type (comma separated)",placeholder = "30,30,30", value = "30,30,30")
-          #                  )
