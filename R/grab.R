@@ -9,7 +9,7 @@
 #'
 #' @examples
 #' grab()
-grab <- function(n, ...){
+grab <- function(){
 
   # Find all available studies
   all_studies <-
