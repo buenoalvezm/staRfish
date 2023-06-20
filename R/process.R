@@ -1,5 +1,5 @@
-require(tidyverse)
-require(scales)
+#require(tidyverse)
+#require(scales)
 
 #rna <- read_tsv("/home/rstudio/staRfish/data_test/data_mrna_seq_v2_rsem.txt")
 #rpot <- read_tsv("/home/rstudio/staRfish/data_test/data_protein_quantification.txt") %>%
@@ -22,12 +22,15 @@ require(scales)
 #  separate(Composite.Element.REF,into=c("gene","gene_2")) %>% select(!gene_2) %>% na.omit()
 #rna <- read_tsv("/home/rstudio/staRfish/data_test/data_mrna_seq_fpkm.txt") %>% dplyr::rename("gene"=Hugo_Symbol)
 
-
-cor_matrix_samples <- function(rna,protein) {
+gather_rna_protein_data <- function(rna,protein) {
+  gathered_data <- dplyr::inner_join(x=protein,y=rna,by="gene",suffix=c(".prot",".rna"))
+  return(gathered_data)
+}
+cor_matrix_samples <- function(gathered_data) {
   require(reshape2)
   require(ggplot2)
   require(viridis)
-  gathered <- dplyr::inner_join(x=protein,y=rna,by="gene",suffix=c(".prot",".rna")) %>% select(-gene) %>% na.omit()
+  gathered <- gathered_data %>% select(-gene) %>% na.omit()
   cormat <- round(cor(gathered),2)
   mcormat <- melt(cormat)
 
@@ -61,7 +64,14 @@ create_transcript_protein_correlation <- function(rna,protein) {
   gene_correlations <- diag(cor(t(trans_data), t(prot_data)))
 
   correlations_df <- data.frame(gene = common_genes, correlation = gene_correlations) %>% .[order(.$correlation),]
+  return(correlations_df)
+}
+correlation_plot_levels <- function(correlations_df) {
   correlations_df$gene <- factor(correlations_df$gene , levels = correlations_df$gene)
+  Labels_top = rbind(head(arrange(correlations_df,desc(correlation)),10), head(arrange(correlations_df,correlation),10))
+  correlations_df$label = if_else(correlations_df$gene %in% Labels_top$gene,
+                                  correlations_df$gene, NA)
+
   p <- ggplot(correlations_df, aes(x = gene, y = correlation,color=correlation)) +
     geom_point(stat = "identity") +
     theme(axis.title.x= element_blank(),
@@ -70,6 +80,8 @@ create_transcript_protein_correlation <- function(rna,protein) {
           legend.position = "none",
           plot.title= element_text(hjust = 0.5)) +
     geom_hline(yintercept=0)+
+    ggrepel::geom_text_repel(aes(label = label),
+                             size = 4, show.legend = FALSE, max.overlaps=10000) +
     expand_limits(x= c(-50, length(levels(correlations_df$gene))*1.01 ))+
     colorspace::scale_color_continuous_divergingx(palette="PrGn") +
     labs(x = "Gene", y = "Correlation between Transcriptomics and Proteomics", title = "Gene Correlations")
@@ -78,35 +90,84 @@ create_transcript_protein_correlation <- function(rna,protein) {
   return(df)
 }
 
-KEGG_correlation <- function(rna,protein) {
+KEGG_correlation <- function(corr_df) {
   require(tidyverse)
   require(clusterProfiler)
   require(org.Hs.eg.db)
+  require(pathview)
+  require(purrr)
 
-  # Assume you have three tibbles: protein_data, transcript_data, correlation_data
-  # Make sure that all tibbles have a common identifier column, for instance, gene_symbol
-
-  # Merging the protein, transcript, and correlation data into one table
-  merged_data <- protein_data %>%
-    inner_join(transcript_data, by = "gene_symbol") %>%
-    inner_join(correlation_data, by = "gene_symbol")
-
-  # You might want to do some preprocessing steps such as normalization, removing missing values, etc.
-
-  # Now let's do KEGG pathway analysis on genes based on their correlation
-  # Assuming correlation_data has columns: gene_symbol and correlation_coefficient
-  genes <- merged_data$gene_symbol
-  correlation_scores <- merged_data$correlation_coefficient
-
+  genes <- corr_df$gene
   # Convert gene symbols to ENTREZ IDs
   gene_ids <- mapIds(org.Hs.eg.db, keys=genes, column="ENTREZID", keytype="SYMBOL", multiVals="first")
 
-  # Perform enrichment analysis
-  kegg_results <- enrichKEGG(gene         = gene_ids,
-                             organism     = 'hsa', # Assuming human genes
-                             pvalueCutoff = 0.05,  # p-value threshold
-                             qvalueCutoff = 0.2)   # FDR threshold
+  kegg_annotations <- enrichKEGG(gene         = gene_ids,
+                                 organism     = 'hsa', # for human genes
+                                 pAdjustMethod = "none",  # no p-value adjustment
+                                 minGSSize    = 1,
+                                 maxGSSize    = 500)
 
-  # Visualize the KEGG pathway analysis results
-  dotplot(kegg_results, showCategory=10) + theme_minimal()
+
+  kegg_df <- as.data.frame(kegg_annotations) %>% select(ID,Description,geneID)
+
+  expanded_kegg_df <- kegg_df %>%
+    mutate(geneID = strsplit(as.character(geneID), "/")) %>%
+    unnest(geneID) %>%
+    group_by(ID) %>%
+    mutate(gene_index = row_number()) %>%
+    pivot_wider(names_from = gene_index, values_from = geneID, names_prefix = "gene_") %>%
+    select(-ID) %>%
+    pivot_longer(!Description) %>% ungroup() %>% select(-name) %>% na.omit() %>%
+    mutate(value=getSYMBOL(as.character(value),data='org.Hs.eg')) %>%
+    rename(gene=value)
+
+  combined_data <- corr_df %>%
+    inner_join(expanded_kegg_df, by = "gene")
+
+  average_correlation_per_pathway <- combined_data %>%
+    group_by(Description) %>%
+    summarise(average_correlation = mean(correlation, na.rm = TRUE))
+
+  Labels_top = rbind(head(arrange(average_correlation_per_pathway,desc(average_correlation)),10), head(arrange(average_correlation_per_pathway,average_correlation),10))
+  average_correlation_per_pathway$label = if_else(average_correlation_per_pathway$Description %in% Labels_top$Description,
+                     average_correlation_per_pathway$Description, NA)
+  average_correlation_per_pathway$color = if_else(average_correlation_per_pathway$Description %in% Labels_top$Description,
+                                                  1, NA)
+
+
+
+  # You may also want to visualize the results
+  ggplot(average_correlation_per_pathway, aes(x=reorder(Description, average_correlation), y=average_correlation,color=color)) +
+    geom_point(stat="identity") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    ggrepel::geom_text_repel(aes(label = label),
+                             size = 4, show.legend = FALSE, max.overlaps=10000) +
+    theme(axis.title.x= element_blank(),
+          axis.text.x = element_blank(),
+          panel.background = element_rect(fill="white"),
+          legend.position = "none",
+          plot.title= element_text(hjust = 0.5)) +
+    labs(x = "KEGG Pathway", y = "Average Correlation", title = "Average Correlation of Protein/Transcript Levels in KEGG Pathways")
+}
+
+plot_gene <- function(gathered_data,corr_df,gene_name) {
+  require(ggpubr)
+  stopifnot("Gene not available in dataset" = gene_name %in% gathered_data$gene)
+  gene_tib <- gathered_data %>% filter(gene==gene_name) %>%
+    pivot_longer(!gene,names_to=c("patient","type"),names_sep="\\.",values_to="expr") %>%
+    pivot_wider(id_cols="patient",names_from="type",values_from="expr") %>% na.omit()
+
+  ggplot(gene_tib,aes(x=prot,y=rna)) +
+    geom_point() +
+    geom_smooth(method='lm') +
+    stat_regline_equation(label.y = max(gene_tib$rna), aes(label = ..rr.label..)) +
+    ggtitle(gene_name) +
+    theme(panel.background = element_rect(fill="white"),
+          legend.position = "none",
+          plot.title= element_text(hjust = 0.5)) +
+    xlab("Protein expression") +
+    ylab("RNA expression")
+
+
 }
