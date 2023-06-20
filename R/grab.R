@@ -8,28 +8,28 @@
 #' @export
 #'
 #' @examples
-#' grab(n = 20, massSpectrometrySampleCount, mrnaRnaSeqSampleCount)
+#' grab()
 grab <- function(n, ...){
 
-  # Retrieve all studies
+  # Find all available studies
   all_studies <-
     cbioportalR::available_studies("www.cbioportal.org")
 
-  # Find studies with specified data
+  # Get info for all studies
   all_studies_info <-
     map_df(all_studies$studyId, function(study) {
-      get_study_info(study) |>
-        as_tibble() |>
-        select(studyId, name, cancerTypeId, referenceGenome, importDate,...)
+      get_study_info(study_id = study, base_url = "wwww.cbioportal.org") |>
+        as_tibble()
     })
 
-  # Filter according to minimum sample size
-  candidate_studies <-
-    all_studies_info |>
-    filter(if_all(6:last_col(), ~ . > n))
-
-  return(candidate_studies)
+  # Save results
+  write_csv(all_studies_info, "data/all_studies_info.csv")
 
 }
+
+
+
+
+
 
 
