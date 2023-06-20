@@ -21,7 +21,8 @@ fluidPage(
                       selected = c("mrnaRnaSeqSampleCount",
                                    "massSpectrometrySampleCount")),
           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
-          selectInput("select_study",label="Select study", choices= textOutput("study_ids"), multiple = F),
+          selectInput("select_study",label="Select study", choices= "Please choose one", multiple = F),
+          # textOutput("study_ids")
         ),
 
         # Show a plot of the generated distribution

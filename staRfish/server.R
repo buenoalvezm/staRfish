@@ -11,14 +11,21 @@ source("../R/squeeze.R")
 
 function(input, output, session) {
 
-  queried_table <- reactive({input$chosen_fields %>%
+  all_studies <- reactive({input$chosen_fields %>%
     strsplit(split = ",") %$%
     squeeze(n = input$n_samples, unlist(.))
     })
 
   # output$study_ids <- NULL
-  output$study_table <- renderTable({queried_table()})
-  output$study_ids <- renderText(c("wait for results", "test"))#, renderTable(queried_table()) %>% pull(studyId))
+  output$study_table <- renderTable({all_studies()})
+  study_ids <- reactive({all_studies() %>% pull(studyId)})
+  # print(study_ids)
+  observe({
+    updateSelectInput(session, "select_study", choices =   study_ids())
+  })
+  # %>% pull(studyId)
+  # print(test %>% pull(studyId))
+  # output$study_ids <- renderText(c("wait for results", "test"))#, renderTable(queried_table()) %>% pull(studyId))
 
 
 
