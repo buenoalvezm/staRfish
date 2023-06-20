@@ -43,7 +43,7 @@ cor_matrix_samples <- function(rna,protein) {
   return(p)
 }
 
-transcript_protein_correlation <- function(rna,protein) {
+create_transcript_protein_correlation <- function(rna,protein) {
   r <- rna %>% na.omit()
   r$gene <- make.unique(r$gene)
   p <- protein %>% na.omit()
@@ -76,4 +76,37 @@ transcript_protein_correlation <- function(rna,protein) {
   print(p)
   df <- rbind(correlations_df[1:10,],correlations_df[(length(correlations_df[[1]])-10):length(correlations_df[[1]]),])
   return(df)
+}
+
+KEGG_correlation <- function(rna,protein) {
+  require(tidyverse)
+  require(clusterProfiler)
+  require(org.Hs.eg.db)
+
+  # Assume you have three tibbles: protein_data, transcript_data, correlation_data
+  # Make sure that all tibbles have a common identifier column, for instance, gene_symbol
+
+  # Merging the protein, transcript, and correlation data into one table
+  merged_data <- protein_data %>%
+    inner_join(transcript_data, by = "gene_symbol") %>%
+    inner_join(correlation_data, by = "gene_symbol")
+
+  # You might want to do some preprocessing steps such as normalization, removing missing values, etc.
+
+  # Now let's do KEGG pathway analysis on genes based on their correlation
+  # Assuming correlation_data has columns: gene_symbol and correlation_coefficient
+  genes <- merged_data$gene_symbol
+  correlation_scores <- merged_data$correlation_coefficient
+
+  # Convert gene symbols to ENTREZ IDs
+  gene_ids <- mapIds(org.Hs.eg.db, keys=genes, column="ENTREZID", keytype="SYMBOL", multiVals="first")
+
+  # Perform enrichment analysis
+  kegg_results <- enrichKEGG(gene         = gene_ids,
+                             organism     = 'hsa', # Assuming human genes
+                             pvalueCutoff = 0.05,  # p-value threshold
+                             qvalueCutoff = 0.2)   # FDR threshold
+
+  # Visualize the KEGG pathway analysis results
+  dotplot(kegg_results, showCategory=10) + theme_minimal()
 }
