@@ -3,7 +3,7 @@ library(shiny)
 fluidPage(
 
     # Application title
-    titlePanel("cBioPortal data selection"),
+    titlePanel("StaRfish Data Explorer"),
 
 
     sidebarLayout(
