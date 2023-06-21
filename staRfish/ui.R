@@ -25,6 +25,7 @@ fluidPage(
           downloadButton('download_metadata',"Download metada"),
           actionButton("start_analyses", "Start analyses!")
           # textOutput("study_ids")
+          # textOutput("active_study_id")
         ),
 
         # Show a plot of the generated distribution
@@ -62,3 +63,5 @@ fluidPage(
         )
     )
 )
+
+

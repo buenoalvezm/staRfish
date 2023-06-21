@@ -1,6 +1,5 @@
 suppressPackageStartupMessages(library(cBioPortalData, quietly = T))
 suppressPackageStartupMessages(library(shiny, quietly = T))
-suppressPackageStartupMessages(library(tidyverse, quietly = T))
 suppressPackageStartupMessages(library(cbioportalR, quietly = T))
 suppressPackageStartupMessages(library(magrittr, quietly = T))
 suppressPackageStartupMessages(library(org.Hs.eg.db))
@@ -10,19 +9,27 @@ library(ggpubr)
 library(ggrepel)
 library(colorspace)
 library(annotate)
+suppressPackageStartupMessages(library(tidyverse, quietly = T))
+suppressPackageStartupMessages(library(magrittr, quietly = T))
+
+
 
 source("../R/grab.R")
 source("../R/digest.R")
 source("../R/squeeze.R")
+source("../R/release_data.R")
 source("../R/release_metadata.R")
+
+select <- dplyr::select
 
 function(input, output, session) {
 
   ## Studies table
   all_studies <- reactive({input$chosen_fields %>%
-    strsplit(split = ",") %$%
-    squeeze(n = input$n_samples, unlist(.))
-    })
+      strsplit(split = ",") %$%
+      squeeze(n = input$n_samples, unlist(.))
+  })
+
 
   output$study_table <- DT::renderDT({all_studies()})
   study_ids <- reactive({all_studies() %>% pull(studyId)})
@@ -41,6 +48,42 @@ function(input, output, session) {
       write_tsv(release_metadata(input$select_study), fname)
     })
 
+  # active_study_id <- reactive({
+  #   input$select_study
+  # })
+  #
+  # molecular_types <- reactive({
+  #   input$chosen_fields %>%
+  #     strsplit(split = ",") %>%
+  #     unlist()
+  # })
+  #
+  # rna_data <- reactive({
+  #   types <- unlist(molecular_types())
+  #   rna_type <- types[grepl("Rna", types)][1]
+  #   rna_data <- release_data(study_id = active_study_id(),
+  #                            molecular_type = rna_type)
+  #
+  #   rna_data_filt <-
+  #     rna_data |>
+  #     select(patientId, hugoGeneSymbol, value)
+  #
+  #   return(rna_data_filt)
+  # })
+  #
+  # protein_data <- reactive({
+  #   protein_data <-  release_data(study_id = active_study_id(), molecular_type = "massSpectrometrySampleCount")
+  #   return(protein_data)
+  # })
+  #
+  # output$rna_table <- renderTable({
+  #   rna_data()
+  # })
+  #
+  #
+  # output$protein_table <- renderTable({
+  #   protein_data()
+  # })
 
   protein <- read_tsv("../data_test/data_protein_quantification.txt") %>%
     separate(Composite.Element.REF,into=c("gene","gene_2")) %>% select(!gene_2) %>% na.omit()
@@ -78,6 +121,7 @@ function(input, output, session) {
         dev.off()
       })
     ###
+
 
     ### Big correlation matrix ###
     output$plot_big_correlation <- renderPlot({cor_matrix_samples(gathered_data = gathered_data)})
