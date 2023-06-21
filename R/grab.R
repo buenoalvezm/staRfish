@@ -23,7 +23,7 @@ grab <- function(){
     })
 
   # Save results
-  write_csv(all_studies_info, "data/all_studies_info.csv")
+  write_csv(all_studies_info, "inst/extdata/all_studies_info.csv")
 
 }
 
