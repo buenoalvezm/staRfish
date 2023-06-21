@@ -18,19 +18,19 @@
 #rna_4 <- rna_2 %>% mutate(gene=rna$Hugo_Symbol)
 #total_all_samp <- inner_join(rpot,rna_4,by="gene",suffix=c(".prot",".rna")) %>% select(-gene)
 
-#protein <- read_tsv("/home/rstudio/staRfish/data_test/data_protein_quantification.txt") %>%
-#  separate(Composite.Element.REF,into=c("gene","gene_2")) %>% select(!gene_2) %>% na.omit()
-#rna <- read_tsv("/home/rstudio/staRfish/data_test/data_mrna_seq_fpkm.txt") %>% dplyr::rename("gene"=Hugo_Symbol)
-#metadata <- read_tsv("/home/rstudio/staRfish/data_test/brca_cptac_2020_clinical_data.tsv") %>% select(-c(`Study ID`,`Patient ID`))
-require(tidyverse)
-require(clusterProfiler)
-require(org.Hs.eg.db)
-require(reshape2)
-require(ggplot2)
-require(viridis)
-require(ggpubr)
-require(ggbeeswarm)
-require(ggrepel)
+# protein <- read_tsv("data_test/data_protein_quantification.txt") %>%
+#  separate(Composite.Element.REF,into=c("gene","gene_2")) %>% dplyr::select(!gene_2) %>% na.omit()
+# rna <- read_tsv("data_test/data_mrna_seq_fpkm.txt") %>% dplyr::rename("gene"=Hugo_Symbol)
+# metadata <- read_tsv("data_test/brca_cptac_2020_clinical_data.tsv") %>% dplyr::select(-c(`Study ID`,`Patient ID`))
+# require(tidyverse)
+# require(clusterProfiler)
+# require(org.Hs.eg.db)
+# require(reshape2)
+# require(ggplot2)
+# require(viridis)
+# require(ggpubr)
+# require(ggbeeswarm)
+# require(ggrepel)
 
 ### DATA PROCESSING ###
 #' gather_rna_prot_data(rna, protein)
