@@ -1,29 +1,34 @@
-suppressPackageStartupMessages(library(cBioPortalData, quietly = T))
-suppressPackageStartupMessages(library(shiny, quietly = T))
-suppressPackageStartupMessages(library(tidyverse, quietly = T))
-suppressPackageStartupMessages(library(cbioportalR, quietly = T))
-suppressPackageStartupMessages(library(magrittr, quietly = T))
-suppressPackageStartupMessages(library(org.Hs.eg.db))
+library(cBioPortalData, quietly = T)
+library(shiny, quietly = T)
+library(cbioportalR, quietly = T)
+library(magrittr, quietly = T)
+library(org.Hs.eg.db)
 library(reshape2)
 library(viridis)
 library(ggpubr)
 library(ggrepel)
 library(colorspace)
 library(annotate)
+library(tidyverse, quietly = T)
+library(magrittr, quietly = T)
 
 
 source("../R/grab.R")
 source("../R/digest.R")
 source("../R/squeeze.R")
+source("../R/release_data.R")
 source("../R/release_metadata.R")
+
+select <- dplyr::select
 
 function(input, output, session) {
 
   ## Studies table
   all_studies <- reactive({input$chosen_fields %>%
-    strsplit(split = ",") %$%
-    squeeze(n = input$n_samples, unlist(.))
-    })
+      strsplit(split = ",") %$%
+      squeeze(n = input$n_samples, unlist(.))
+  })
+
 
   output$study_table <- DT::renderDT({all_studies()})
   study_ids <- reactive({all_studies() %>% pull(studyId)})
@@ -42,10 +47,47 @@ function(input, output, session) {
       write_tsv(release_metadata(input$select_study), fname)
     })
 
+  # active_study_id <- reactive({
+  #   input$select_study
+  # })
+  #
+  # molecular_types <- reactive({
+  #   input$chosen_fields %>%
+  #     strsplit(split = ",") %>%
+  #     unlist()
+  # })
+  #
+  # rna_data <- reactive({
+  #   types <- unlist(molecular_types())
+  #   rna_type <- types[grepl("Rna", types)][1]
+  #   rna_data <- release_data(study_id = active_study_id(),
+  #                            molecular_type = rna_type)
+  #
+  #   rna_data_filt <-
+  #     rna_data |>
+  #     select(patientId, hugoGeneSymbol, value)
+  #
+  #   return(rna_data_filt)
+  # })
+  #
+  # protein_data <- reactive({
+  #   protein_data <-  release_data(study_id = active_study_id(), molecular_type = "massSpectrometrySampleCount")
+  #   return(protein_data)
+  # })
+  #
+  # output$rna_table <- renderTable({
+  #   rna_data()
+  # })
+  #
+  #
+  # output$protein_table <- renderTable({
+  #   protein_data()
+  # })
+
   protein <- read_tsv("../data_test/data_protein_quantification.txt") %>%
-    separate(Composite.Element.REF,into=c("gene","gene_2")) %>% select(!gene_2) %>% na.omit()
+    separate(Composite.Element.REF,into=c("gene","gene_2")) %>% dplyr::select(!gene_2) %>% na.omit()
   rna <- read_tsv("../data_test/data_mrna_seq_fpkm.txt") %>% dplyr::rename("gene"=Hugo_Symbol)
-  metadata <- read_tsv("../data_test/brca_cptac_2020_clinical_data.tsv") %>% select(-c(`Study ID`,`Patient ID`))
+  metadata <- read_tsv("../data_test/brca_cptac_2020_clinical_data.tsv") %>% dplyr::select(-c(`Study ID`,`Patient ID`))
 
   observeEvent(input$start_analyses,{
     gathered_data <- gather_rna_prot_data(rna = rna, protein = protein)
@@ -56,17 +98,8 @@ function(input, output, session) {
     corr_plot_levels_plot <- correlation_plot_levels(correlations_df)[[2]]
     KEGG_corr_plot <- KEGG_correlation_plot(combined_pw_data = combined_pw_data)
 
-    # plot_gene_res <-
-    ## Correlation plot
-    # data_plot <- reactive({
-    #   if(input$gene_name %in% unique(iris$Species)){
-    #     iris %>% filter(Species == input$gene_name)
-    #   } else {
-    #       iris
-    #     }
-    #   })
 
-    ### Transcriptomics vs proteomics plot ###
+    ## Transcriptomics vs proteomics plot ###
     output$plot_correlation <- renderPlot({corr_plot_levels_plot})
 
 
@@ -78,6 +111,7 @@ function(input, output, session) {
         dev.off()
       })
     ###
+
 
     ### Big correlation matrix ###
     output$plot_big_correlation <- renderPlot({cor_matrix_samples(gathered_data = gathered_data)})
@@ -92,7 +126,7 @@ function(input, output, session) {
 
     ###
 
-    ### KEG plot ###
+    ## KEG plot ###
     output$plot_kegg <- renderPlot({KEGG_corr_plot})
 
     output$download_plot_kegg <- downloadHandler(
@@ -109,32 +143,45 @@ function(input, output, session) {
       print(head(gathered_data))
       print(input$gene_names)
       plot_gene(gathered_data = gathered_data, gene_name = input$gene_names)
-
-    })
-  }
-
-  # output$plot_correlation <- renderPlot({plot(data_plot()$Sepal.Length, data_plot()$Sepal.Width)})
-
-
-
-  ### ADD REAL PLOT CODE
-  output$download_corr_plot <- downloadHandler(
-    filename = "placeholder_filename.png",
-    content = function(filename) {
-      png(filename)
-      plot(data_plot()$Sepal.Length, data_plot()$Sepal.Width)
-      dev.off()
     })
 
-  ## Placeholder plot
-  output$plot_correlation2 <- renderPlot({plot(iris$Sepal.Length, iris$Sepal.Width)})
+    output$plot_gene <- renderPlot({plot_gene_res()})
+    output$download_plot_gene <- downloadHandler(
+      filename = "gene.png",
+      content = function(filename) {
+        png(filename)
+        plot(plot_gene_res)
+        dev.off()
+      })
+  })
 
-  ### ADD REAL PLOT CODE
-  output$download_corr_plot2 <- downloadHandler(
-    filename = "placeholder_filename2.png",
-    content = function(filename) {
-      png(filename)
-      plot(iris$Sepal.Length, iris$Sepal.Width)
-      dev.off()
-    })
+  all_genes <- gathered_data %>%
+      pull(gene) %>%
+      unique()
+
+  observe({
+    updateSelectizeInput(session, "gene_names", choices =   all_genes)
+  })
+
+  plot_gene_res <- reactive({
+    print(input$gene_names)
+    if (length(renderText({input$gene_names})) >0){
+      plot_gene(gathered_data = gathered_data, gene_name = renderText({input$gene_names}))
+    } else {
+      plot(0)
+    }
+  })
+
+  ###
 }
+
+
+# plot_gene_res <-
+## Correlation plot
+# data_plot <- reactive({
+#   if(input$gene_name %in% unique(iris$Species)){
+#     iris %>% filter(Species == input$gene_name)
+#   } else {
+#       iris
+#     }
+#   })
