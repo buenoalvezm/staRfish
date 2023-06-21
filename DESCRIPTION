@@ -2,10 +2,14 @@ Package: staRfish
 Type: Package
 Title: Analyses RNA and protein correlation in studies from cBioPortal
 Version: 0.1.0
-Authors:
+Author:
   Carolina Pita Barros <cpbhousing@gmail.com> [aut, cre]
   Adam Marstrand <adamboegh@gmail.com> [aut, cre]
   María Bueno Álvez <buenoalvezm@gmail.com> [aut, cre]
+Maintainer:
+  Carolina Pita Barros <cpbhousing@gmail.com> 
+  Adam Marstrand <adamboegh@gmail.com> 
+  María Bueno Álvez <buenoalvezm@gmail.com> 
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: MIT + file LICENSE
@@ -30,5 +34,9 @@ Imports:
     purrr,
     reshape2,
     shiny,
+    stats,
     tidyr,
+    utils,
     viridis
+Depends: 
+    R (>= 2.10)
