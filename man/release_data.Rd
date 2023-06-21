@@ -2,7 +2,7 @@
 % Please edit documentation in R/release_data.R
 \name{release_data}
 \alias{release_data}
-\title{Title Extract the molecular data from a study}
+\title{Extract the molecular data from a study}
 \usage{
 release_data(study_id, molecular_type)
 }
