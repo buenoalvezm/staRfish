@@ -10,8 +10,7 @@ Maintainer:
   Carolina Pita Barros <cpbhousing@gmail.com> 
   Adam Marstrand <adamboegh@gmail.com> 
   María Bueno Álvez <buenoalvezm@gmail.com> 
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: staRfish provides the functions and a shiny app to study RNA-protein correlation on data from cBioPortal.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
