@@ -9,6 +9,7 @@ library(ggpubr)
 library(ggrepel)
 library(colorspace)
 library(annotate)
+library(clusterProfiler)
 library(tidyverse, quietly = T)
 library(magrittr, quietly = T)
 
@@ -51,38 +52,38 @@ function(input, output, session) {
   #   input$select_study
   # })
   #
-  # molecular_types <- reactive({
-  #   input$chosen_fields %>%
-  #     strsplit(split = ",") %>%
-  #     unlist()
-  # })
+  molecular_types <- reactive({
+    input$chosen_fields %>%
+      strsplit(split = ",") %>%
+      unlist()
+  })
   #
-  # rna_data <- reactive({
-  #   types <- unlist(molecular_types())
-  #   rna_type <- types[grepl("Rna", types)][1]
-  #   rna_data <- release_data(study_id = active_study_id(),
-  #                            molecular_type = rna_type)
+  rna_data <- reactive({
+    types <- unlist(molecular_types())
+    rna_type <- types[grepl("Rna", types)][1]
+    rna_data <- release_data(study_id = study_ids(),
+                             molecular_type = rna_type)
+
+    rna_data_filt <-
+      rna_data() |>
+      select(patientId, hugoGeneSymbol, value)
+
+    return(rna_data_filt)
+  })
   #
-  #   rna_data_filt <-
-  #     rna_data |>
-  #     select(patientId, hugoGeneSymbol, value)
+  protein_data <- reactive({
+    protein_data <-  release_data(study_id = study_ids(), molecular_type = "massSpectrometrySampleCount")
+    return(protein_data)
+  })
   #
-  #   return(rna_data_filt)
-  # })
-  #
-  # protein_data <- reactive({
-  #   protein_data <-  release_data(study_id = active_study_id(), molecular_type = "massSpectrometrySampleCount")
-  #   return(protein_data)
-  # })
-  #
-  # output$rna_table <- renderTable({
-  #   rna_data()
-  # })
+  output$rna_table <- renderTable({
+    rna_data()
+  })
   #
   #
-  # output$protein_table <- renderTable({
-  #   protein_data()
-  # })
+  output$protein_table <- renderTable({
+    protein_data()
+  })
 
   protein <- read_tsv("../data_test/data_protein_quantification.txt") %>%
     separate(Composite.Element.REF,into=c("gene","gene_2")) %>% dplyr::select(!gene_2) %>% na.omit()
@@ -91,6 +92,7 @@ function(input, output, session) {
 
   observeEvent(input$start_analyses,{
     gathered_data <- gather_rna_prot_data(rna = rna, protein = protein)
+    print(gathered_data)
     correlations_df <- create_rna_prot_correlation(rna = rna, protein = protein)
     combined_pw_data <- create_pw_df(corr_df = correlations_df)
     plot_corr_matrix <- cor_matrix_samples(gathered_data = gathered_data)
@@ -153,24 +155,26 @@ function(input, output, session) {
         plot(plot_gene_res)
         dev.off()
       })
+    all_genes <- reactive({gathered_data %>%
+        dplyr::pull(gene) %>%
+        unique()
+    })
+    #
+    observe({
+      updateSelectizeInput(session, "gene_names", choices =   all_genes())
+    })
+    #
+    plot_gene_res <- reactive({
+      print(input$gene_names)
+      if (length(renderText({input$gene_names})) >0){
+        plot_gene(gathered_data = gathered_data, gene_name = {input$gene_names})
+      } else {
+        plot(0)
+      }
+    })
   })
 
-  all_genes <- gathered_data %>%
-      pull(gene) %>%
-      unique()
 
-  observe({
-    updateSelectizeInput(session, "gene_names", choices =   all_genes)
-  })
-
-  plot_gene_res <- reactive({
-    print(input$gene_names)
-    if (length(renderText({input$gene_names})) >0){
-      plot_gene(gathered_data = gathered_data, gene_name = renderText({input$gene_names}))
-    } else {
-      plot(0)
-    }
-  })
 
   ###
 }
