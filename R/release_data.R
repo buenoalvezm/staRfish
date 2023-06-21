@@ -39,5 +39,11 @@ release_data <- function(study_id, molecular_type) {
       by =  c("entrezGeneId", "hugoGeneSymbol"),
       molecularProfileId = molecular_profile_id)
 
-  return(molecular_data[[1]])
+  final_data <-
+    molecular_data[[1]] |>
+    dplyr::select(gene=hugoGeneSymbol,pID=patientId,value=value) |>
+    pivot_wider(id_cols=gene,names_from=pID,values_from=value)
+
+
+  return(final_data)
 }
