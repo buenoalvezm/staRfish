@@ -21,7 +21,9 @@ fluidPage(
                       selected = c("mrnaRnaSeqSampleCount",
                                    "massSpectrometrySampleCount")),
           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
-          selectInput("select_study",label="Select study", choices= "Please choose one", multiple = F)
+          selectInput("select_study",label="Select study", choices= "Please choose one", multiple = F),
+          downloadButton('download_metadata',"Download metada"),
+          actionButton("start_analyses", "Start analyses!")
           # textOutput("study_ids")
           # textOutput("active_study_id")
         ),
@@ -30,14 +32,36 @@ fluidPage(
         mainPanel(
           tabsetPanel(
             tabPanel("Study browser",
-                     tableOutput("study_table")
+                     DT::DTOutput("study_table")
+                     ),
+            tabPanel("Active study",
+                     DT::DTOutput("metadata_table")
+                     ),
+            tabPanel("Correlation",
+                     downloadButton('download_big_correlation',"Download plot"),
+                     plotOutput("plot_big_correlation")
+                     ),
+            tabPanel("Transcriptomics vs Proteomics",
+                     downloadButton('download_transcrp_prot',"Download plot"),
+                     plotOutput("plot_correlation"),
+                     selectizeInput("gene_names", "Select Gene",
+                                     choices = "Start selecting",
+                                     multiple =F),
+                     plotOutput("plot_gene"),
+                     downloadButton('download_corr_plot',"Download plot")
+
             ),
-            tabPanel("Active study"),
-            tabPanel("Correlation")
+            # tabPanel("Test",
+            # ),
+            tabPanel("KEGG Correlation",
+                     downloadButton('download_plot_kegg',"Download plot"),
+                     plotOutput("plot_kegg")
+                     )
+
 
           )
-
+        )
     )
 )
-)
+
 
