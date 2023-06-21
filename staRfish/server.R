@@ -12,6 +12,7 @@ library(annotate)
 library(clusterProfiler)
 library(tidyverse, quietly = T)
 library(magrittr, quietly = T)
+library(ggbeeswarm)
 
 
 source("../R/grab.R")
@@ -48,52 +49,46 @@ function(input, output, session) {
       write_tsv(release_metadata(input$select_study), fname)
     })
 
-  # active_study_id <- reactive({
-  #   input$select_study
-  # })
-  #
-  molecular_types <- reactive({
-    input$chosen_fields %>%
-      strsplit(split = ",") %>%
-      unlist()
-  })
-  #
-  rna_data <- reactive({
-    types <- unlist(molecular_types())
-    rna_type <- types[grepl("Rna", types)][1]
-    rna_data <- release_data(study_id = study_ids(),
-                             molecular_type = rna_type)
 
-    rna_data_filt <-
-      rna_data() |>
-      select(patientId, hugoGeneSymbol, value)
 
-    return(rna_data_filt)
-  })
-  #
-  protein_data <- reactive({
-    protein_data <-  release_data(study_id = study_ids(), molecular_type = "massSpectrometrySampleCount")
-    return(protein_data)
-  })
-  #
-  output$rna_table <- renderTable({
-    rna_data()
-  })
-  #
-  #
-  output$protein_table <- renderTable({
-    protein_data()
-  })
 
-  protein <- read_tsv("../data_test/data_protein_quantification.txt") %>%
-    separate(Composite.Element.REF,into=c("gene","gene_2")) %>% dplyr::select(!gene_2) %>% na.omit()
-  rna <- read_tsv("../data_test/data_mrna_seq_fpkm.txt") %>% dplyr::rename("gene"=Hugo_Symbol)
-  metadata <- read_tsv("../data_test/brca_cptac_2020_clinical_data.tsv") %>% dplyr::select(-c(`Study ID`,`Patient ID`))
+
+  metadata_in <- reactive({
+    release_metadata(study_id = input$select_study)
+    })
 
   observeEvent(input$start_analyses,{
-    gathered_data <- gather_rna_prot_data(rna = rna, protein = protein)
-    print(gathered_data)
-    correlations_df <- create_rna_prot_correlation(rna = rna, protein = protein)
+
+    # Getting data
+    active_study_id <- reactive({
+      input$select_study
+    })
+    #
+    molecular_types <- reactive({
+      input$chosen_fields %>%
+        strsplit(split = ",") %>%
+        unlist()
+    })
+    # #
+    rna <- reactive({
+      types <- molecular_types()
+      rna_type <- types[grepl("Rna", types)][[1]]
+      print(active_study_id())
+      rna_data <- release_data(study_id = active_study_id(),
+                               molecular_type = rna_type)
+    })
+
+    protein_data <- reactive({
+      release_data(study_id = active_study_id(), molecular_type = "massSpectrometrySampleCount")
+    })
+
+    protein <- reactive({
+      protein_data() %>%
+        na.omit()
+    })
+
+    gathered_data <- gather_rna_prot_data(rna = rna(), protein = protein())
+    correlations_df <- create_rna_prot_correlation(rna = rna(), protein = protein())
     combined_pw_data <- create_pw_df(corr_df = correlations_df)
     plot_corr_matrix <- cor_matrix_samples(gathered_data = gathered_data)
     corr_plot_levels_df <- correlation_plot_levels(correlations_df)[1]
@@ -142,8 +137,6 @@ function(input, output, session) {
     ### Plot gene ###
 
     plot_gene_res <- reactive({
-      print(head(gathered_data))
-      print(input$gene_names)
       plot_gene(gathered_data = gathered_data, gene_name = input$gene_names)
     })
 
@@ -165,13 +158,43 @@ function(input, output, session) {
     })
     #
     plot_gene_res <- reactive({
-      print(input$gene_names)
       if (length(renderText({input$gene_names})) >0){
         plot_gene(gathered_data = gathered_data, gene_name = {input$gene_names})
       } else {
         plot(0)
       }
     })
+
+    all_metadata_cols <- reactive({
+      print(colnames(metadata_in()))
+      colnames(metadata_in())
+      })
+    # Plot metadata
+    output$plot_metadata <- renderPlot({metadata_correlations(metadata = metadata_in() ,
+                                                              gathered_data = gathered_data,
+                                                              clin_var = input$select_metadata,
+                                                              gene_name = input$gene_names_meta,
+                                                              regression = input$regression)})
+    output$download_plot_metadata <- downloadHandler(
+      filename = "plot_metadata.png",
+      content = function(filename) {
+        png(filename)
+        plot(metadata_correlations(metadata = metadata_in() ,
+                              gathered_data = gathered_data,
+                              clin_var = input$select_metadata,
+                              gene_name = input$gene_names_meta,
+                              regression = input$regression))
+        dev.off()
+      })
+
+    observe({
+      updateSelectizeInput(session, "gene_names_meta", choices =   all_genes())
+    })
+    observe({
+      updateSelectizeInput(session, "select_metadata", choices =  all_metadata_cols()[2:length(all_metadata_cols())])
+    })
+
+
   })
 
 
