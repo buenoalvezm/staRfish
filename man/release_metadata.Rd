@@ -2,7 +2,7 @@
 % Please edit documentation in R/release_metadata.R
 \name{release_metadata}
 \alias{release_metadata}
-\title{Title Extract the metadata from a study}
+\title{Extract the metadata from a study}
 \usage{
 release_metadata(study_id)
 }
@@ -13,7 +13,7 @@ release_metadata(study_id)
 Tibble with the study metadata
 }
 \description{
-Title Extract the metadata from a study
+Extract the metadata from a study
 }
 \examples{
 release_metadata(study_id = "brca_cptac_2020")

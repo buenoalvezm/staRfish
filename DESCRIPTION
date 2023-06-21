@@ -1,14 +1,42 @@
 Package: staRfish
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Analyses RNA and protein correlation in studies from cBioPortal
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Authors@R: c(person(given = "Carolina",
+           family = "Pita Barros",
+           role = c("aut", "cre"),
+           email = "cpbhousing@gmail.com"),
+    person(given = "Adam",
+           family = "Marstrand",
+           role = c("aut", "cre"),
+           email = "adamboegh@gmail.com"),
+    person(given = "María",
+           family = "Bueno Álvez",
+           role = c("aut", "cre"),
+           email = "buenoalvezm@gmail.com"))
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/buenoalvezm/staRfish
+URL: https://github.com/buenoalvezm/staRfish,
+    https://buenoalvezm.github.io/staRfish/
 BugReports: https://github.com/buenoalvezm/staRfish/issues
 RoxygenNote: 7.2.3
+Imports: 
+    annotate,
+    cBioPortalData,
+    cbioportalR,
+    clusterProfiler,
+    colorspace,
+    dplyr,
+    ggplot2,
+    ggpubr,
+    ggrepel,
+    magrittr,
+    org.Hs.eg.db,
+    purrr,
+    reshape2,
+    shiny,
+    tidyr,
+    viridis
