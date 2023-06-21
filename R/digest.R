@@ -55,7 +55,7 @@ gather_rna_prot_data <- function(rna,protein) {
 #' @param rna a tibble containing mRNA expression values for genes across patient samples
 #' @param protein a tibble containing protein expression values for genes across patient samples
 #'
-#' @returna single tibble containing the correlation of RNA and proteins across all shared genes.
+#' @return a single tibble containing the correlation of RNA and proteins across all shared genes.
 #' @export
 #'
 #' @examples
@@ -194,7 +194,6 @@ correlation_plot_levels <- function(correlations_df) {
 #' @export
 #'
 #' @examples
-#' KEGG_correlation_plot(pw_df)
 KEGG_correlation_plot <- function(combined_pw_data) {
   average_correlation_per_pathway <- combined_pw_data %>%
     group_by(Description) %>%
