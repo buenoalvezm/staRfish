@@ -123,9 +123,8 @@ correlation_plot_levels <- function(correlations_df) {
     expand_limits(x= c(-50, length(levels(correlations_df$gene))*1.01 ))+
     colorspace::scale_color_continuous_divergingx(palette="PiYG") +
     labs(x = "Gene", y = "Correlation between Transcriptomics and Proteomics", title = "Gene Correlations")
-  suppressWarnings(print(p))
   df <- rbind(correlations_df[1:10,],correlations_df[(length(correlations_df[[1]])-10):length(correlations_df[[1]]),])[1:2]
-  return(df)
+  return(list(df,p))
 }
 
 KEGG_correlation_plot <- function(combined_pw_data) {
@@ -174,6 +173,38 @@ plot_gene <- function(gathered_data,gene_name) {
 
 }
 
-metadata_correlations <- function(metadata,gathered_data,clin_var) {
+metadata_correlations <- function(metadata,gathered_data,clin_var,gene_name) {
+  gene_tib <- gathered_data %>% filter(gene==gene_name) %>%
+    pivot_longer(!gene,names_to=c("patient","type"),names_sep="\\.",values_to="expr") %>%
+    pivot_wider(id_cols="patient",names_from="type",values_from="expr") %>% na.omit()
+  meta_corr_df <- metadata %>% rename("Sample ID"="patient") %>%
+    left_join(.,gene_tib,by="patient",suffix=c("","")) %>%
+    dplyr::select(all_of(clin_var),prot,rna) %>% na.omit()
+  stopifnot("Clinical variable not found or does not have enough data" = {(!(colnames(meta_corr_df[1])=="rna" | colnames(meta_corr_df[1]=="prot")))
+    !(length(meta_corr_df[[1]])==0)})
+
+  max_first  <- max(meta_corr_df$rna)   # Specify max of first y axis
+  max_second <- max(meta_corr_df$prot) # Specify max of second y axis
+  min_first  <- min(meta_corr_df$rna)   # Specify min of first y axis
+  min_second <- min(meta_corr_df$prot) # Specify min of second y axis
+  scale = (max_second - min_second)/(max_first - min_first)
+  shift = min_first - min_second
+  # Function to scale secondary axis
+  scale_function <- function(x, scale, shift){
+    return ((x)*scale - shift)
+  }
+
+  # Function to scale secondary variable values
+  inv_scale_function <- function(x, scale, shift){
+    return ((x + shift)/scale)
+  }
+
+  if (meta_corr_df[[1]])
+  ggplot(meta_corr_df,aes(x=get(clin_var),y=rna)) +
+    geom_point(color="#7FBF7B") +
+    geom_point(aes(y=inv_scale_function(prot,scale,shift)),color="#AF8DC3") +
+    scale_y_continuous(limits = c(min_first, max_first), sec.axis = sec_axis(~scale_function(., scale, shift), name="Protein level")) +
+    labs(x = "Clinical variable", y = "RNA expression", color = "")
+
 
 }
