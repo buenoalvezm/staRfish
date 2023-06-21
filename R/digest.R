@@ -21,6 +21,7 @@
 #protein <- read_tsv("/home/rstudio/staRfish/data_test/data_protein_quantification.txt") %>%
 #  separate(Composite.Element.REF,into=c("gene","gene_2")) %>% select(!gene_2) %>% na.omit()
 #rna <- read_tsv("/home/rstudio/staRfish/data_test/data_mrna_seq_fpkm.txt") %>% dplyr::rename("gene"=Hugo_Symbol)
+#metadata <- read_tsv("/home/rstudio/staRfish/data_test/brca_cptac_2020_clinical_data.tsv") %>% select(-c(`Study ID`,`Patient ID`))
 require(tidyverse)
 ### DATA PROCESSING ###
 gather_rna_prot_data <- function(rna,protein) {
@@ -170,5 +171,9 @@ plot_gene <- function(gathered_data,gene_name) {
           plot.title= element_text(hjust = 0.5)) +
     xlab("Protein expression") +
     ylab("RNA expression")
+
+}
+
+metadata_correlations <- function(metadata,gathered_data,clin_var) {
 
 }
