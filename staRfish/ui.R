@@ -22,20 +22,37 @@ fluidPage(
                                    "massSpectrometrySampleCount")),
           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
           selectInput("select_study",label="Select study", choices= "Please choose one", multiple = F),
-          downloadButton('download_metadata',"Download metada"),
+          downloadButton('download_metadata',"Download metada")
           # textOutput("study_ids")
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
           tabsetPanel(
-            tabPanel("Study browser", DTOutput("study_table")),
-            tabPanel("Active study", DTOutput("metadata_table")),
-            tabPanel("Correlation")
+            tabPanel("Study browser",
+                     DT::DTOutput("study_table")
+                     ),
+            tabPanel("Active study",
+                     DT::DTOutput("metadata_table")
+                     ),
+            tabPanel("Correlation",
+                     downloadButton('download_corr_plot2',"Download plot"),
+                     plotOutput("plot_correlation2")
+                     ),
+            tabPanel("Test",
+                     column(width = 6,
+                            textInput("gene_name", "Gene", value = "", placeholder = "Gene")
+                            ),
+                     column(width = 6,
+                            # change ID
+                            downloadButton('download_corr_plot',"Download plot")
+                     ),
+                     plotOutput("plot_correlation")
+
+            )
+
 
           )
-          # , downloadButton('download_metadata',"Download the data")
-
         )
     )
 )
