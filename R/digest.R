@@ -34,20 +34,32 @@
 
 ### DATA PROCESSING ###
 #' gather_rna_prot_data(rna, protein)
-#' Transforms the
+#' Transforms the data to fit the following functions
 #'
-#' @param rna
-#' @param protein
+#' @param rna a tibble containing mRNA expression values for genes across patient samples
+#' @param protein a tibble containing protein expression values for genes across patient samples
 #'
-#' @return
+#' @return a single tibble containing both protein and data for future processing
 #' @export
 #'
 #' @examples
+#' gathered_data <- gather_rna_prot_data(rna, protein)
 gather_rna_prot_data <- function(rna,protein) {
   gathered_data <- dplyr::inner_join(x=protein,y=rna,by="gene",suffix=c(".prot",".rna"))
   return(gathered_data)
 }
 
+#' create_rna_prot_correlation
+#' Creates a table with correlation between RNA and protein levels for each gene found in both the RNA and protein data.
+#'
+#' @param rna a tibble containing mRNA expression values for genes across patient samples
+#' @param protein a tibble containing protein expression values for genes across patient samples
+#'
+#' @returna single tibble containing the correlation of RNA and proteins across all shared genes.
+#' @export
+#'
+#' @examples
+#' corr_df <- create_rna_prot_correlation(rna,protein)
 create_rna_prot_correlation <- function(rna,protein) {
   r <- rna %>% na.omit()
   r$gene <- make.unique(r$gene)
@@ -67,6 +79,17 @@ create_rna_prot_correlation <- function(rna,protein) {
   return(correlations_df)
 }
 
+#' create_pw_df
+#' Creates a dataframe of the average correlation between RNA and Protein levels within all KEGG pathways detected in the dataset.
+#'
+#' @param corr_df A dataframe of correlations between RNA and Protein levels.
+#'
+#' @return A dataframe containing pathways and the average correlation found in them
+#' @export
+#'
+#' @examples
+#' pw_df <- create_pw_df(corr_df)
+#'
 create_pw_df <- function(corr_df) {
   genes <- corr_df$gene
 
@@ -98,6 +121,16 @@ create_pw_df <- function(corr_df) {
 }
 
 ### START PLOTTING DATA ###
+#' cor_matrix_samples
+#' Create a plot showing the correlation between RNA and Protein in the individual samples.
+#'
+#' @param gathered_data A single tibble containing both protein and data for future processing
+#'
+#' @return A plot showing the correlation between RNA and Protein levels in individual samples
+#' @export
+#'
+#' @examples
+#' cor_matrix_samples(gathered_data)
 cor_matrix_samples <- function(gathered_data) {
 
   gathered <- gathered_data %>% dplyr::select(-gene) %>% na.omit()
@@ -117,6 +150,15 @@ cor_matrix_samples <- function(gathered_data) {
 }
 
 
+#' correlation_plot_levels
+#' Create a plot showing the correlation between RNA and Protein in each gene.
+#' @param correlations_df A dataframe of correlations between RNA and Protein levels.
+#'
+#' @return A plot showing the correlation between RNA and Protein levels in all genes and a dataframe of the 10 most positively and negatively correlated RNA/Protein pairs
+#' @export
+#'
+#' @examples
+#' correlation_plot_levels(corr_df)
 correlation_plot_levels <- function(correlations_df) {
   correlations_df$gene <- factor(correlations_df$gene , levels = correlations_df$gene)
   Labels_top = rbind(head(arrange(correlations_df,desc(correlation)),10), head(arrange(correlations_df,correlation),10))
@@ -143,6 +185,16 @@ correlation_plot_levels <- function(correlations_df) {
   return(list(df,p))
 }
 
+#' KEGG_correlation_plot
+#' Create a plot showing the correlation between RNA and Protein in KEGG pathways.
+#'
+#' @param combined_pw_data A dataframe containing pathways and the average correlation found in them
+#'
+#' @return a plot of the average correlation between RNA and Protein levels in all pathways in detected in the gene set
+#' @export
+#'
+#' @examples
+#' KEGG_correlation_plot(pw_df)
 KEGG_correlation_plot <- function(combined_pw_data) {
   average_correlation_per_pathway <- combined_pw_data %>%
     group_by(Description) %>%
@@ -169,6 +221,17 @@ KEGG_correlation_plot <- function(combined_pw_data) {
   suppressWarnings(print(p))
 }
 
+#' plot_gene
+#' Plots the RNA/Protein levels for a given gene.
+#'
+#' @param gathered_data A single tibble containing both protein and data for processing
+#' @param gene_name The name of a single gene to plot
+#'
+#' @return A plot showing RNA/Protein levels for the gene provided
+#' @export
+#'
+#' @examples
+#' plot_gene(gathered_data, "ARPC1A")
 plot_gene <- function(gathered_data,gene_name) {
 
   stopifnot("Gene not available in dataset" = gene_name %in% gathered_data$gene)
@@ -191,7 +254,24 @@ plot_gene <- function(gathered_data,gene_name) {
 
 }
 
-metadata_correlations <- function(metadata,gathered_data,clin_var,gene_name) {
+#' metadata_correlations
+#'
+#' Plots the RNA and protein levels in relation to a given clinical parameter. Both gene name and metadata parameter name must be supplied.
+#'
+#' The function automatically determines the plot to use; A Conditional Density plot for binary values, A barplot with beeswarm points for non-binary categorical values and finally a regular point plot with or without linear regression for continuous data.
+#'
+#' @param metadata A tibble containing metadata for each patient in the sample.
+#' @param gathered_data A single tibble containing both protein and data for processing
+#' @param clin_var The name of a clinical variable present in the metadata file.
+#' @param gene_name The name of a single gene to plot
+#' @param regression FALSE/TRUE whether a linear regression should be plotted for continuous metadata parameters
+#'
+#' @return A plot showing the protein and RNA levels in relation to a given
+#' @export
+#'
+#' @examples
+#' plot_gene(metadata, gathered_data, "Tumor Stage", "ARPC1A",regression=T)
+metadata_correlations <- function(metadata,gathered_data,clin_var,gene_name,regression=T) {
   # Function to scale secondary axis
   scale_function <- function(x, scale, shift){
     return ((x)*scale - shift)
@@ -249,7 +329,7 @@ metadata_correlations <- function(metadata,gathered_data,clin_var,gene_name) {
         guides(fill = "none", colour = "legend")
     }
   } else {
-    if (checkbox) {
+    if (regression) {
       p <- ggplot(meta_corr_df,aes(x=get(clin_var),y=rna)) +
         geom_point(color="#009B9F") +
         geom_smooth(color="#009B9F",method="lm") +
@@ -278,7 +358,20 @@ metadata_correlations <- function(metadata,gathered_data,clin_var,gene_name) {
   }
 }
 
-get_all_metadata_correlations <- function(metadata,gathered_data,gene_name) {
-  p_list <- map(colnames(metadata), \(x) metadata_correlations(metadata,gathered_data,x,gene_name))
+#' get_all_metadata_correlations
+#' Produces all plots for RNA and Protein levels related to all metadata variables.
+#'
+#' @param metadata A tibble containing metadata for each patient in the sample.
+#' @param gathered_data A single tibble containing both protein and data for processing
+#' @param gene_name The name of a single gene to plot
+#' @param regression FALSE/TRUE whether a linear regression should be plotted for continuous metadata parameters
+#'
+#' @return Returns a list of plots of all the metadata.
+#' @export
+#'
+#' @examples
+#' plot_gene(metadata, gathered_data, "ARPC1A",regression=T)
+get_all_metadata_correlations <- function(metadata,gathered_data,gene_name,regression=T) {
+  p_list <- map(colnames(metadata[2:length(metadata)]), \(x) metadata_correlations(metadata,gathered_data,x,gene_name,regression))
   return(p_list)
 }
