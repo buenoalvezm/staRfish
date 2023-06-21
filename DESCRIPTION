@@ -25,6 +25,7 @@ Imports:
     clusterProfiler,
     colorspace,
     dplyr,
+    ggbeeswarm,
     ggplot2,
     ggpubr,
     ggrepel,
