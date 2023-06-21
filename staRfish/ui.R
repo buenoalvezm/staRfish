@@ -22,7 +22,8 @@ fluidPage(
                                    "massSpectrometrySampleCount")),
           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
           selectInput("select_study",label="Select study", choices= "Please choose one", multiple = F),
-          downloadButton('download_metadata',"Download metada")
+          downloadButton('download_metadata',"Download metada"),
+          actionButton("start_analyses", "Start analyses!")
           # textOutput("study_ids")
         ),
 
@@ -36,20 +37,25 @@ fluidPage(
                      DT::DTOutput("metadata_table")
                      ),
             tabPanel("Correlation",
-                     downloadButton('download_corr_plot2',"Download plot"),
-                     plotOutput("plot_correlation2")
+                     downloadButton('download_big_correlation',"Download plot"),
+                     plotOutput("plot_big_correlation")
                      ),
-            tabPanel("Test",
-                     column(width = 6,
-                            textInput("gene_name", "Gene", value = "", placeholder = "Gene")
-                            ),
-                     column(width = 6,
-                            # change ID
-                            downloadButton('download_corr_plot',"Download plot")
-                     ),
-                     plotOutput("plot_correlation")
+            tabPanel("Transcriptomics vs Proteomics",
+                     downloadButton('download_transcrp_prot',"Download plot"),
+                     plotOutput("plot_correlation"),
+                     selectizeInput("gene_names", "Select Gene",
+                                     choices = "Start selecting",
+                                     multiple =F),
+                     plotOutput("plot_gene"),
+                     downloadButton('download_corr_plot',"Download plot")
 
-            )
+            ),
+            # tabPanel("Test",
+            # ),
+            tabPanel("KEGG Correlation",
+                     downloadButton('download_plot_kegg',"Download plot"),
+                     plotOutput("plot_kegg")
+                     )
 
 
           )
