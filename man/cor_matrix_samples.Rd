@@ -17,6 +17,3 @@ A plot showing the correlation between RNA and Protein levels in individual samp
 cor_matrix_samples
 Create a plot showing the correlation between RNA and Protein in the individual samples.
 }
-\examples{
-cor_matrix_samples(gathered_data)
-}

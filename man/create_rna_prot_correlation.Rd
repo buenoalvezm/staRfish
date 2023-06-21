@@ -12,10 +12,10 @@ create_rna_prot_correlation(rna, protein)
 
 \item{protein}{a tibble containing protein expression values for genes across patient samples}
 }
+\value{
+a single tibble containing the correlation of RNA and proteins across all shared genes.
+}
 \description{
 create_rna_prot_correlation
 Creates a table with correlation between RNA and protein levels for each gene found in both the RNA and protein data.
-}
-\examples{
-corr_df <- create_rna_prot_correlation(rna,protein)
 }

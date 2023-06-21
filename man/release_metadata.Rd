@@ -15,6 +15,3 @@ Tibble with the study metadata
 \description{
 Extract the metadata from a study
 }
-\examples{
-release_metadata(study_id = "brca_cptac_2020")
-}

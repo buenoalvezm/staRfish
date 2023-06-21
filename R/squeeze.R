@@ -5,12 +5,9 @@
 #'
 #' @return Tibble with all studies
 #' @export
-#'
-#' @examples
-#' squeeze(n = 20, massSpectrometrySampleCount, mrnaRnaSeqSampleCount)
 squeeze <- function(n, ...){
 
-  all_studies <-read_csv("../data/all_studies_info.csv")
+  all_studies <-read_csv("../inst/extdata/all_studies_info.csv")
 
   # Find studies with specified data
   all_studies_info <-

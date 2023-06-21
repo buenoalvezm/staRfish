@@ -19,6 +19,3 @@ a single tibble containing both protein and data for future processing
 gather_rna_prot_data(rna, protein)
 Transforms the data to fit the following functions
 }
-\examples{
-gathered_data <- gather_rna_prot_data(rna, protein)
-}

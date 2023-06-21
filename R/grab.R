@@ -6,9 +6,6 @@
 #'
 #' @return Table of candidate studies
 #' @export
-#'
-#' @examples
-#' grab()
 grab <- function(){
 
   # Find all available studies
@@ -23,7 +20,7 @@ grab <- function(){
     })
 
   # Save results
-  write_csv(all_studies_info, "data/all_studies_info.csv")
+  write_csv(all_studies_info, "inst/extdata/all_studies_info.csv")
 
 }
 

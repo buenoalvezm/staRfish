@@ -4,9 +4,6 @@
 #'
 #' @return Tibble with the study metadata
 #' @export
-#'
-#' @examples
-#' release_metadata(study_id = "brca_cptac_2020")
 release_metadata <- function(study_id) {
   cbio <- cBioPortal("www.cbioportal.org")
   metadata <- clinicalData(cbio, study_id)

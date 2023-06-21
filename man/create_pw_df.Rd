@@ -17,7 +17,3 @@ A dataframe containing pathways and the average correlation found in them
 create_pw_df
 Creates a dataframe of the average correlation between RNA and Protein levels within all KEGG pathways detected in the dataset.
 }
-\examples{
-pw_df <- create_pw_df(corr_df)
-
-}

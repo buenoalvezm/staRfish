@@ -17,6 +17,3 @@ Tibble with all studies
 \description{
 Extract studies from cbioportal with the specifcied type of data and minimum number of samples
 }
-\examples{
-squeeze(n = 20, massSpectrometrySampleCount, mrnaRnaSeqSampleCount)
-}

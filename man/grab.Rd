@@ -17,6 +17,3 @@ Table of candidate studies
 \description{
 Grab studies from cbioportal with the specifcied type of data
 }
-\examples{
-grab()
-}

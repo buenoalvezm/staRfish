@@ -19,6 +19,3 @@ A plot showing RNA/Protein levels for the gene provided
 plot_gene
 Plots the RNA/Protein levels for a given gene.
 }
-\examples{
-plot_gene(gathered_data, "ARPC1A")
-}

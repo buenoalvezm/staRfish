@@ -32,6 +32,3 @@ Plots the RNA and protein levels in relation to a given clinical parameter. Both
 \details{
 The function automatically determines the plot to use; A Conditional Density plot for binary values, A barplot with beeswarm points for non-binary categorical values and finally a regular point plot with or without linear regression for continuous data.
 }
-\examples{
-plot_gene(metadata, gathered_data, "Tumor Stage", "ARPC1A",regression=T)
-}
