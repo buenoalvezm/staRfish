@@ -2,18 +2,10 @@ Package: staRfish
 Type: Package
 Title: Analyses RNA and protein correlation in studies from cBioPortal
 Version: 0.1.0
-Authors@R: c(person(given = "Carolina",
-           family = "Pita Barros",
-           role = c("aut", "cre"),
-           email = "cpbhousing@gmail.com"),
-    person(given = "Adam",
-           family = "Marstrand",
-           role = c("aut", "cre"),
-           email = "adamboegh@gmail.com"),
-    person(given = "María",
-           family = "Bueno Álvez",
-           role = c("aut", "cre"),
-           email = "buenoalvezm@gmail.com"))
+Authors:
+  Carolina Pita Barros <cpbhousing@gmail.com> [aut, cre]
+  Adam Marstrand <adamboegh@gmail.com> [aut, cre]
+  María Bueno Álvez <buenoalvezm@gmail.com> [aut, cre]
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: MIT + file LICENSE
