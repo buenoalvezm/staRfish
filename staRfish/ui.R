@@ -55,7 +55,10 @@ fluidPage(
         tabPanel("KEGG Correlation",
                  downloadButton('download_plot_kegg',"Download plot"),
                  plotOutput("plot_kegg")
-        )
+        ),
+        tabPanel("test",
+                 tableOutput("protein_table")
+                 )
 
 
       )
