@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# staRfish
+# staRfish <img src="inst/figures/imgfile.png" align="right" height="138" />
 
 <!-- badges: start -->
 <!-- badges: end -->
