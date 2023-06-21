@@ -15,7 +15,7 @@ release_data(study_id, molecular_type)
 Tibble with the selected molecular data
 }
 \description{
-Title Extract the molecular data from a study
+Extract the molecular data from a study
 }
 \examples{
 release_data(study_id = "coad_silu_2022", molecular_type = "mrnaRnaSeqSampleCount")

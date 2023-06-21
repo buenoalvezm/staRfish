@@ -1,4 +1,4 @@
-#' Title Extract the metadata from a study
+#' Extract the metadata from a study
 #'
 #' @param study_id The cbioportal study ID
 #'
