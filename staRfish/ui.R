@@ -29,8 +29,8 @@ fluidPage(
         # Show a plot of the generated distribution
         mainPanel(
           tabsetPanel(
-            tabPanel("Study browser", tableOutput("study_table")),
-            tabPanel("Active study", tableOutput("metadata_table")),
+            tabPanel("Study browser", DTOutput("study_table")),
+            tabPanel("Active study", DTOutput("metadata_table")),
             tabPanel("Correlation")
 
           )
