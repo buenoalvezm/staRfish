@@ -15,7 +15,7 @@ squeeze <- function(n, ...){
   # Find studies with specified data
   all_studies_info <-
     all_studies |>
-    select(studyId, name, cancerTypeId, referenceGenome, importDate,...)
+    dplyr::select(studyId, name, cancerTypeId, referenceGenome, importDate,...)
 
   # Filter according to minimum sample size
   candidate_studies <-
