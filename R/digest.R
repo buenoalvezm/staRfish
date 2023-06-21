@@ -33,6 +33,16 @@ require(ggbeeswarm)
 require(ggrepel)
 
 ### DATA PROCESSING ###
+#' gather_rna_prot_data(rna, protein)
+#' Transforms the
+#'
+#' @param rna
+#' @param protein
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gather_rna_prot_data <- function(rna,protein) {
   gathered_data <- dplyr::inner_join(x=protein,y=rna,by="gene",suffix=c(".prot",".rna"))
   return(gathered_data)
