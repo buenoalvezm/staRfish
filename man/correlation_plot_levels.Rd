@@ -17,6 +17,3 @@ A plot showing the correlation between RNA and Protein levels in all genes and a
 correlation_plot_levels
 Create a plot showing the correlation between RNA and Protein in each gene.
 }
-\examples{
-correlation_plot_levels(corr_df)
-}

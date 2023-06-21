@@ -6,9 +6,6 @@
 #'
 #' @return Table of candidate studies
 #' @export
-#'
-#' @examples
-#' grab()
 grab <- function(){
 
   # Find all available studies

@@ -28,6 +28,3 @@ Returns a list of plots of all the metadata.
 get_all_metadata_correlations
 Produces all plots for RNA and Protein levels related to all metadata variables.
 }
-\examples{
-plot_gene(metadata, gathered_data, "ARPC1A",regression=T)
-}

@@ -17,6 +17,3 @@ a plot of the average correlation between RNA and Protein levels in all pathways
 KEGG_correlation_plot
 Create a plot showing the correlation between RNA and Protein in KEGG pathways.
 }
-\examples{
-KEGG_correlation_plot(pw_df)
-}
