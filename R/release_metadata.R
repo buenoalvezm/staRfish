@@ -5,7 +5,7 @@
 #' @return Tibble with the study metadata
 #' @export
 release_metadata <- function(study_id) {
-  cbio <- cBioPortal()
+  cbio <- cBioPortal("www.cbioportal.org")
   metadata <- clinicalData(cbio, study_id)
   return(metadata)
 }

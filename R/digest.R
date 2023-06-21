@@ -257,11 +257,20 @@ metadata_correlations <- function(metadata,gathered_data,clin_var,gene_name,regr
   inv_scale_function <- function(x, scale, shift){
     return ((x + shift)/scale)
   }
+
+  # gene_tib <- gathered_data %>% filter(gene==gene_name)
+  # cn_meta<-colnames(metadata)[[1]]
+  # print(cn_meta)
   gene_tib <- gathered_data %>% filter(gene==gene_name) %>%
     pivot_longer(!gene,names_to=c("patient","type"),names_sep="\\.",values_to="expr") %>%
-    pivot_wider(id_cols="patient",names_from="type",values_from="expr") %>% na.omit()
-  meta_corr_df <- metadata %>% rename("Sample ID"="patient") %>%
-    left_join(.,gene_tib,by="patient",suffix=c("","")) %>%
+    pivot_wider(id_cols="patient",names_from="type",values_from="expr") #%>% na.omit()
+  cn_gene <- colnames(gene_tib[1])
+  print(gene_tib)
+  print(cn_gene)
+  print(metadata)
+
+  meta_corr_df <- metadata %>%
+    left_join(.,gene_tib,by=c("patientId"="patient"),suffix=c("","")) %>%
     dplyr::select(all_of(clin_var),prot,rna) %>% na.omit()
   stopifnot("Clinical variable not found or does not have enough data" = (!(colnames(meta_corr_df[1])=="rna" | colnames(meta_corr_df[1])=="prot")))
 

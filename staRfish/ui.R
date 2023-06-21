@@ -56,8 +56,16 @@ fluidPage(
                  downloadButton('download_plot_kegg',"Download plot"),
                  plotOutput("plot_kegg")
         ),
-        tabPanel("test",
-                 tableOutput("protein_table")
+        tabPanel("Metadata correlation",
+                 selectizeInput("gene_names_meta", "Select Gene",
+                                choices = "Start selecting",
+                                multiple =F),
+                 selectizeInput("select_metadata", "Select metada column",
+                                choices = "Start selecting",
+                                multiple =F),
+                 checkboxInput("regression", "Plot regression?", value = T),
+                 plotOutput("plot_metadata"),
+                 downloadButton('download_plot_metadata',"Download plot")
                  )
 
 
