@@ -1,4 +1,4 @@
-#' Title Extract the molecular data from a study
+#' Extract the molecular data from a study
 #'
 #' @param study_id The cbioportal study ID
 #' @param molecular_type The type of data to extract
