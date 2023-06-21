@@ -11,3 +11,4 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/buenoalvezm/staRfish
 BugReports: https://github.com/buenoalvezm/staRfish/issues
+RoxygenNote: 7.2.3
