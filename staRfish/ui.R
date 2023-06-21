@@ -21,19 +21,23 @@ fluidPage(
                       selected = c("mrnaRnaSeqSampleCount",
                                    "massSpectrometrySampleCount")),
           numericInput("n_samples", "Min number of samples in study", value = 30, min = 0),
-          selectInput("select_study",label="Select study", choices= "Please choose one", multiple = F),
+          selectInput("select_study",label="Select study", choices= "Please choose one", multiple = F)
           # textOutput("study_ids")
+          # textOutput("active_study_id")
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
           tabsetPanel(
-            tabPanel("Study browser", tableOutput("study_table")),
+            tabPanel("Study browser",
+                     tableOutput("study_table")
+            ),
             tabPanel("Active study"),
-            tabPanel("Correlation"),
+            tabPanel("Correlation")
 
           )
 
-        )
     )
 )
+)
+

@@ -3,22 +3,28 @@ library(data.table)
 library(DT)
 library(tidyverse)
 library(cbioportalR)
+library(cBioPortalData)
 library(magrittr)
 
 source("../R/grab.R")
 source("../R/process.R")
 source("../R/squeeze.R")
+source("../R/release_data.R")
+source("../R/release_metadata.R")
+
 
 function(input, output, session) {
 
   all_studies <- reactive({input$chosen_fields %>%
-    strsplit(split = ",") %$%
-    squeeze(n = input$n_samples, unlist(.))
-    })
+      strsplit(split = ",") %$%
+      squeeze(n = input$n_samples, unlist(.))
+  })
 
   # output$study_ids <- NULL
   output$study_table <- renderTable({all_studies()})
-  study_ids <- reactive({all_studies() %>% pull(studyId)})
+  study_ids <- reactive({
+    all_studies() %>% pull(studyId)
+  })
   # print(study_ids)
   observe({
     updateSelectInput(session, "select_study", choices =   study_ids())
@@ -27,14 +33,46 @@ function(input, output, session) {
   # print(test %>% pull(studyId))
   # output$study_ids <- renderText(c("wait for results", "test"))#, renderTable(queried_table()) %>% pull(studyId))
 
+ # active_study_id <- reactive({input$select_study})
+  active_study_id <- reactive({
+    input$select_study
+  })
+
+  molecular_types <- reactive({
+    input$chosen_fields %>%
+      strsplit(split = ",") %>%
+      unlist()
+  })
+
+  rna_data <- reactive({
+    types <- unlist(molecular_types())
+    rna_type <- types[grepl("Rna", types)][1]
+    rna_data <- release_data(study_id = active_study_id(),
+                             molecular_type = rna_type)
+
+    rna_data_filt <-
+      rna_data |>
+      select(patientId, hugoGeneSymbol, value)
+
+    return(rna_data_filt)
+  })
+
+  protein_data <- reactive({
+    protein_data <-  release_data(study_id = active_study_id(), molecular_type = "massSpectrometrySampleCount")
+    return(protein_data)
+  })
+
+  output$rna_table <- renderTable({
+    rna_data()
+  })
+
+
+  output$protein_table <- renderTable({
+    protein_data()
+  })
 
 
 
-
-
-
-
-  }
 
   # reactive({print(queried_table())})
   # print(queried_table)
