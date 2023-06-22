@@ -1,0 +1,6 @@
+h1.title {
+  background-image: url(inst/figures/Team_Pic.jpeg), url(inst/figures/imgfile.png);
+  background-repeat: no-repeat;
+  background-position: left, right;
+  background-size: 200px, 200px;
+}
