@@ -2,6 +2,7 @@
 title: "staRfish project presentation"
 format: revealjs
 editor: visual
+css: style.css
 ---
 
 ## staRfish
@@ -16,4 +17,4 @@ We have created a package to analyse RNA/Protein correlation from **cbioportal**
 
 ## Package overview
 
-![](staRfish_Presentation_files/pkg_overview.png){fig-align="center"}
+![](inst/figures/pkg_overview.png){fig-align="center"}
