@@ -1,0 +1,42 @@
+Package: staRfish
+Type: Package
+Title: Analyses RNA and protein correlation in studies from cBioPortal
+Version: 0.1.0
+Author:
+  Carolina Pita Barros <cpbhousing@gmail.com> [aut, cre]
+  Adam Marstrand <adamboegh@gmail.com> [aut, cre]
+  María Bueno Álvez <buenoalvezm@gmail.com> [aut, cre]
+Maintainer:
+  Carolina Pita Barros <cpbhousing@gmail.com> 
+  Adam Marstrand <adamboegh@gmail.com> 
+  María Bueno Álvez <buenoalvezm@gmail.com> 
+Description: staRfish provides the functions and a shiny app to study RNA-protein correlation on data from cBioPortal.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+URL: https://github.com/buenoalvezm/staRfish,
+    https://buenoalvezm.github.io/staRfish/
+BugReports: https://github.com/buenoalvezm/staRfish/issues
+RoxygenNote: 7.2.3
+Imports: 
+    annotate,
+    cBioPortalData,
+    cbioportalR,
+    clusterProfiler,
+    colorspace,
+    dplyr,
+    ggbeeswarm,
+    ggplot2,
+    ggpubr,
+    ggrepel,
+    magrittr,
+    org.Hs.eg.db,
+    purrr,
+    reshape2,
+    shiny,
+    stats,
+    tidyr,
+    utils,
+    viridis
+Depends: 
+    R (>= 2.10)

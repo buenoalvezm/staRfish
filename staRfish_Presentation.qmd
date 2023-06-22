@@ -1,0 +1,20 @@
+---
+title: "staRfish project presentation"
+format: revealjs
+editor: visual
+css: style.css
+---
+
+## staRfish
+
+We have created a package to analyse RNA/Protein correlation from **cbioportal**.
+
+-   Shiny app for data exploration
+
+-   Correlation plots
+
+-   Interactive gene\<-\>metadata correlation exploration
+
+## Package overview
+
+![](inst/figures/pkg_overview.png){fig-align="center"}
