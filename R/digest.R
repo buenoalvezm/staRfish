@@ -265,9 +265,7 @@ metadata_correlations <- function(metadata,gathered_data,clin_var,gene_name,regr
     pivot_longer(!gene,names_to=c("patient","type"),names_sep="\\.",values_to="expr") %>%
     pivot_wider(id_cols="patient",names_from="type",values_from="expr") #%>% na.omit()
   cn_gene <- colnames(gene_tib[1])
-  print(gene_tib)
-  print(cn_gene)
-  print(metadata)
+
 
   meta_corr_df <- metadata %>%
     left_join(.,gene_tib,by=c("patientId"="patient"),suffix=c("","")) %>%
