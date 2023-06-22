@@ -73,7 +73,6 @@ function(input, output, session) {
     rna <- reactive({
       types <- molecular_types()
       rna_type <- types[grepl("Rna", types)][[1]]
-      print(active_study_id())
       rna_data <- release_data(study_id = active_study_id(),
                                molecular_type = rna_type)
     })
@@ -166,7 +165,6 @@ function(input, output, session) {
     })
 
     all_metadata_cols <- reactive({
-      print(colnames(metadata_in()))
       colnames(metadata_in())
       })
     # Plot metadata
@@ -183,7 +181,7 @@ function(input, output, session) {
                               gathered_data = gathered_data,
                               clin_var = input$select_metadata,
                               gene_name = input$gene_names_meta,
-                              regression = input$regression))
+                              regression = T))
         dev.off()
       })
 
