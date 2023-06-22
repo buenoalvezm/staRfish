@@ -8,6 +8,9 @@
 #' @export
 grab <- function(){
 
+  if(!exists("inst/extdata")) {
+    dir.create("inst/extdata", showWarnings = FALSE)
+  }
   # Find all available studies
   all_studies <-
     cbioportalR::available_studies("www.cbioportal.org")
